@@ -1,0 +1,37 @@
+data:
+  data_dir: /usr/workspace/hip/ML4Jets/regression_images/
+  particle_type: pion
+  num_train_files: 50
+  num_val_files: 20
+  batch_size: 1024
+  shuffle: False
+  num_procs: 16
+  preprocess: True
+  output_dir: preprocessed_data/
+  already_preprocessed: True
+model:
+  block_type: graphnet
+  num_blocks: 2
+  num_layers: 4
+  latent_size: 64
+  concat_input: False
+  reducer: sum
+  edge_block_opt:
+    use_edges: True
+    use_receiver_nodes: True
+    use_sender_nodes: True
+    use_globals: True
+  node_block_opt:
+    use_received_edges: True
+    use_sent_edges: False
+    use_nodes: True
+    use_globals: True
+  global_block_opt:
+    use_edges: False
+    use_nodes: True
+    use_globals: True
+training:
+  epochs: 20
+  learning_rate: 1.e-3
+  alpha: 0
+  save_dir: results/

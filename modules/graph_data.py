@@ -217,5 +217,5 @@ if __name__=='__main__':
                                   batch_size=32,
                                   shuffle=False)
 
-    # for nodes, senders, recievers, edges in data_gen.gen:
-    #     pass
+    for nodes, senders, recievers, edges in data_gen.gen:
+        pass

@@ -107,6 +107,7 @@ class EncodeProcessDecode(snt.Module):
                edge_output_size=None,
                node_output_size=None,
                global_output_size=None,
+               num_processing_steps=10,
                name="EncodeProcessDecode"):
     super(EncodeProcessDecode, self).__init__(name=name)
 
@@ -118,8 +119,7 @@ class EncodeProcessDecode(snt.Module):
     self._decoder = MLPGraphIndependent(node_model_fn=None,
                                         edge_model_fn=None, 
                                         name="decoder")
-    self._output_global_fn = lambda: snt.Linear(1, name="network_output")
-
+    self.num_processing_steps = num_processing_steps
     # Transforms the outputs into the appropriate shapes.
     if edge_output_size is None:
       edge_fn = None
@@ -134,18 +134,17 @@ class EncodeProcessDecode(snt.Module):
     else:
       global_fn = lambda: snt.Linear(global_output_size, name="global_output")
     self._output_transform = modules.GraphIndependent(
-        edge_fn, node_fn, global_fn)
+        edge_fn, node_fn, global_fn, name="network_output")
 
-  def __call__(self, input_op, num_processing_steps):
+  def __call__(self, input_op):
     latent = self._encoder(input_op)
     latent0 = latent
     output_ops = []
-    for _ in range(num_processing_steps):
+    for _ in range(self.num_processing_steps):
       core_input = utils_tf.concat([latent0, latent], axis=1)
       latent = self._core(core_input)
       decoded_op = self._decoder(latent)
       output_ops.append(self._output_transform(decoded_op))
 
-    # stacked_output = utils_tf.concat(output_ops, axis=1)
-    # output = self._output_global_fn()(stacked_output.globals)
-    return output_ops
+    stacked_output = utils_tf.concat(output_ops, axis=1)
+    return stacked_output
